@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<head>
+  <!--
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  -->
+  <script src="http://localhost/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io('http://localhost/');
+    socket.on('connect', () => {
+
+      socket.send('hi!');
+
+      socket.on('message', (d) => alert(`message: ${d}`));
+
+    });
+  </script>
+</head>
