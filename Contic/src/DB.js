@@ -119,10 +119,10 @@ class Db extends EventEmitter {
         assert.equal(null, err);
         this.db = db;
         console.log('Connected successfully to server');
-        this.emit('connection');
+        this.emit('connection', db);
       });
     } else
-      this.emit('connection');
+      this.emit('connection', this.db);
   }
 
   end() {

@@ -2,145 +2,113 @@
 // Created by Gustavo Viegas on 2017/02
 //
 
+const EventEmitter = require('events');
 const DbCollection = require('./DB').DbCollection;
 const Db = require('./DB').Db;
 
-const url = 'mongodb://localhost:27017/condata';
-const db = new Db(url);
-db.on('connection', onDbConnection);
-
-var collections = {
-  Users: null,
-  Units: null,
-  Zones: null,
-  VData: null
+const USER_DOC = {
+  id: '',
+  name: '',
+  password: '',
+  access: 0,
+  unit_id: ''
+};
+const UNIT_DOC = {
+  id: '',
+  location: '',
+  data: [{
+    time: new Date(),
+    value: 0
+  }]
+};
+const ZONE_DOC = {
+  id: '',
+  name: '',
+  units_id: ['']
+};
+const VDATA_DOC = {
+  id: '',
+  unit_id: '',
+  data: [{
+    time: new Date(),
+    value: 0
+  }]
+};
+const DATA_DOC = {
+  time: new Date(), 
+  value: 0
 };
 
-function onDbConnection() {
-  collections.Users = new DbCollection(db.db, 'users');
-  collections.Units = new DbCollection(db.db, 'units');
-  collections.Zones = new DbCollection(db.db, 'zones');
-  collections.VData = new DbCollection(db.db, 'vdata');
+function userDoc(id, name, password, access, unit_id = '') {
+  let doc = USER_DOC;
+  doc.id = id;
+  doc.name = name;
+  doc.password = password;
+  doc.access = access;
+  doc.unit_id = unit_id;
+  return doc;
+}
+function unitDoc(id, location, data = []) {
+  let doc = UNIT_DOC;
+  doc.id = id;
+  doc.location = location,
+  doc.data = data;
+  return doc;
+}
+function zoneDoc(id, name, units_id) {
+  let doc = ZONE_DOC;
+  doc.id = id;
+  doc.name = name;
+  doc.units_id = units_id;
+  return doc;
+}
+function vdataDoc(id, unit_id, data = []) {
+  let doc = VDATA_DOC;
+  doc.id = id;
+  doc.unit_id = unit_id;
+  doc.data = data;
+  return doc;
+}
+function dataDoc(time, value) {
+  let doc = DATA_DOC;
+  doc.time = time;
+  doc.value = value;
+  return doc;
 }
 
-// test
-setTimeout(() => {
-  collections.Units.deleteAll();
-  collections.Users.queryAll();
-  collections.Units.queryAll();
-}, 3000);
-//
+const URL = 'mongodb://localhost:27017/condata';
 
-/*
-class UsersCollection {
-  constructor(db, name) {
-    this.collection = new DbCollection(db, name);
-    this.collection.createIndex({'id' : 1});
+class DataAccess extends EventEmitter {
+  constructor(url = URL) {
+    super();
+    this.db = null;
+    this.collections = {users: null, units: null, zones: null, vdata: null};
+    this.init(url);
   }
 
-  insertPUser(id, name, pwd) {
-    this.collection.insert({'id': id, 'name': name, 'pwd': pwd});
+  init(url) {
+    this.db = new Db(url);
+    this.db.on('connection', (db) => {
+      this.collections.users = new DbCollection(db, 'users');
+      this.collections.units = new DbCollection(db, 'units');
+      this.collections.zones = new DbCollection(db, 'zones');
+      this.collections.vdata = new DbCollection(db, 'vdata');
+      this.emit('ready');
+    });
   }
 
-  insertCUser(id, name, pwd, unit_id) {
-    this.collection.insert(
-      {'id': id, 'name': name, 'pwd': pwd, 'unit_id': unit_id});
-  }
-
-  queryUser(id, callback) {
-    this.collection.query({'id': id}, callback);
-  }
-
-  queryAll(callback) {
-    this.collection.queryAll(callback);
-  }
-}
-
-class UnitsCollection {
-  constructor(db, name) {
-    this.collection = new DbCollection(db, name);
-    this.collection.createIndex({id: 1});
-    this.collection.createIndex({location: '2dsphere'});
-  }
-
-  insertUnit(id, location, data = {}) {
-    this.collection.insert({id: id, location: location, data: data});
-  }
-
-  insertMany(ids, locations, data = null) {
-    if(ids.length != locations.length) return;
-    let docs = [];
-    for(let i = 0; i < ids.length; ++i) {
-      docs.push({
-        'id': ids[i], 
-        'location': locations[i], 
-        'data': data && data[i] ? data[i] : {}
-      });
+  end() {
+    if(this.db) {
+      this.db.end();
+      this.db = null;
     }
-    this.collection.insertMany(docs);
-  }
-
-  queryUnit(id, callback) {
-    this.collection.query({'id': id}, callback);
-  }
-
-  queryByLocation(location, callback) {
-    this.collection.query({'location': location}, callback);
-  }
-
-  queryAll(callback) {
-    this.collection.queryAll(callback);
   }
 }
 
-class ZonesCollection {
-  constructor(db, name) {
-    this.collection = new DbCollection(db, name);
-  }
-
-  insertZone(id, name, units) {
-
-  }
-
-  queryZone(id) {
-
-  }
-
-  queryAll() {}
-}
-
-class TDataCollection {
-  constructor(db, name) {
-    this.collection = new DbCollection(db, name);
-  }
-
-  insertData(id, unit, time, value) {
-
-  }
-
-  insertMany(ids, units, time, value) {
-
-  }
-
-  queryData(id) {
-
-  }
-
-  queryByValue(value) {
-
-  }
-
-  queryAll() {}
-}
-
-const url = 'mongodb://localhost:27017/condata';
-
-const db = new Db(url);
-db.on('connection', () => {
-  let units = new UnitsCollection(db.db, 'units');
-  //units.insertUnit('unit98', [-1,-2], {v: 1.4});
-  //units.insertMany(['unit5', 'unit6', 'unit7'], [[7,7], [8,8], [9,9]], [{'v': 0.1}, {'v': 0.2}]);
-  //units.queryUnit('unit98', (err, doc) => console.log(doc));
-  db.end();
+var da = new DataAccess();
+da.on('ready', () => {
+  for(let key in da.collections)
+    da.collections[key].queryAll();
+  //da.collections.units.insertOne(unitDoc('1@units', [1,2]));
+  da.end();
 });
-*/
