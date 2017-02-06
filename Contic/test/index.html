@@ -7,11 +7,17 @@
   <script>
     const socket = io('http://localhost/');
     socket.on('connect', () => {
+      socket.send({
+        type: 'query',
+        data: {id: 't@units'}
+      });
 
-      socket.send('hi!');
-
-      socket.on('message', (d) => alert(`message: ${d}`));
-
+      socket.on('message', (d) => {
+        document.getElementsByTagName('body')[0].innerHTML = 'Check the Console!';
+        console.log('Message Received:');
+        console.log(d);
+      });
     });
   </script>
 </head>
+<body></body>

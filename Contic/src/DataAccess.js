@@ -78,6 +78,9 @@ function dataDoc(time, value) {
 
 const URL = 'mongodb://localhost:27017/condata';
 
+// todo
+// - create indexes
+// - db functions (presets for common operations)
 class DataAccess extends EventEmitter {
   constructor(url = URL) {
     super();
@@ -105,10 +108,18 @@ class DataAccess extends EventEmitter {
   }
 }
 
+exports.DataAccess = new DataAccess();
+
+/*
 var da = new DataAccess();
 da.on('ready', () => {
-  for(let key in da.collections)
-    da.collections[key].queryAll();
-  //da.collections.units.insertOne(unitDoc('1@units', [1,2]));
+  //da.collections.units.deleteAll();
+  //da.collections.units.insertOne(unitDoc('t@units', [10,10]));
+  //da.collections.units.updateOne({id: 't@units'}, {location: [0, 1]});
+  //da.collections.units.updateOne({id: 't@units'}, {data: dataDoc(new Date(Date.now()), 2.2)}, '$push');
+  //for(let key in da.collections)
+  //  da.collections[key].queryAll();
+  da.collections.units.query({id: 't@units'}, (err, doc) => console.log(doc));
   da.end();
 });
+*/

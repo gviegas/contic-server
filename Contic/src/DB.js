@@ -11,9 +11,23 @@ class DbCollection {
     this.collection = db.collection(collection); 
   }
 
-  query(filter, callback = null) {
-    if(callback)
-      this.collection.find(filter).each(callback); // each or next or toArray ?
+  query(filter, callback = null, method = 'toArray') {
+    if(callback) {
+      switch(method) {
+        case 'each': 
+          this.collection.find(filter).each(callback);
+          break;
+        case 'next':
+          this.collection.find(filter).next(callback);
+          break;
+        case 'toArray':
+          this.collection.find(filter).toArray(callback);
+          break;
+        default:
+          console.log(`Invalid query method "${method}"`);
+          return;
+      }
+    }
     else
       this.collection.find(filter).toArray((err, docs) => {
         assert.equal(null, err);
@@ -49,22 +63,46 @@ class DbCollection {
       });
   }
   
-  updateOne(filter, value, callback = null) {
+  updateOne(filter, value, operation = '$set', callback = null) {
+    let update = null;
+    switch(operation) {
+      case '$set':
+        update = {$set: value};
+        break;
+      case '$push':
+        update = {$push: value};
+        break;
+      default:
+        console.log(`Invalid update operation "${operation}"`);
+        return;
+    }
     if(callback)
-      this.collection.updateOne(filter, { $set : value}, callback);
+      this.collection.updateOne(filter, update, callback);
     else
-      this.collection.updateOne(filter, { $set : value}, (err, res) => {
+      this.collection.updateOne(filter, update, (err, res) => {
         assert.equal(null, err);
         assert.equal(1, res.result.n);
         console.log('Document updated');
       });
   }
 
-  updateMany(filter, value, callback = null) {
+  updateMany(filter, value, operation = '$set', callback = null) {
+    let update = null;
+    switch(operation) {
+      case '$set':
+        update = {$set: value};
+        break;
+      case '$push':
+        update = {$push: value};
+        break;
+      default:
+        console.log(`Invalid update operation "${operation}"`);
+        return;
+    }
     if(callback)
-      this.collection.updateMany(filter, { $set: value}, callback);
+      this.collection.updateMany(filter, update, callback);
     else
-      this.collection.updateMany(filter, { $set: value}, (err, res) => {
+      this.collection.updateMany(filter, update, (err, res) => {
         assert.equal(null, err);
         console.log(`${res.result.n} document(s) updated`);
       });
