@@ -5,22 +5,12 @@
 const io = require('socket.io')(80);
 const da = require('./DataAccess').DataAccess;
 
-/*
-da.on('ready', () => {
-  console.log('ready');
+const MsgTypes = Object.freeze({
+    QUERY: 'query',
+    INSERT: 'insert',
+    UPDATE: 'update',
+    DELETE: 'delete'
 });
-
-io.on('connection', (socket) => {
-
-  socket.on('message', (d) => {
-    console.log(`message: ${d}`)
-    socket.send('!!!');
-  });
-
-  socket.on('disconnect', () => console.log('disconnected'));
-
-});
-*/
 
 da.on('ready', () => {
   io.on('connection', (socket) => {
@@ -34,11 +24,10 @@ da.on('ready', () => {
   });
 });
 
-// doing
 function processMessage(socket, d) {
   switch(d.type) {
     case 'query':
-      da.collections.units.query({id: d.data.id}, (err, doc) => {
+      da.collections.units.queryIgnoreData(d.data.id, (err, doc) => {
         console.log('Fetched: '); // debug
         console.log(doc); // debug
         socket.send(doc);
