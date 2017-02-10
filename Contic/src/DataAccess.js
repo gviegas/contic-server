@@ -4,7 +4,6 @@
 
 const EventEmitter = require('events');
 const MongoClient = require('mongodb').MongoClient;
-const DbCollection = require('./DB').DbCollection;//
 const Db = require('./DB').Db;
 
 const USER_DOC = {
@@ -98,7 +97,11 @@ class UnitsColl {
   }
 
   queryByLocation(location, callback) {
-    this.collection.find({loc: location}, callback);
+    this.collection.find({location: location}).toArray(callback);
+  }
+
+  queryAll(callback) {
+    this.collection.find({}).toArray(callback); // use 'next' or 'each' instead
   }
 
   queryIgnoreData(id, callback) {
@@ -106,7 +109,11 @@ class UnitsColl {
   }
 
   queryByLocationIgnoreData(location, callback) {
-    this.collection.find({loc: location}, {data: 0}, callback);
+    this.collection.find({location: location}).project({data: 0}).toArray(callback);
+  }
+
+  queryAllIgnoreData(callback) {
+    this.collection.find({}).project({data: 0}).toArray(callback); // use 'next' or 'each' instead
   }
 
   insert(doc, callback = null) {

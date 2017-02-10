@@ -13,6 +13,9 @@ const MsgTypes = Object.freeze({
 });
 
 da.on('ready', () => {
+  //da.collections.units.insert({id: 'u@units', location: [12, 21], data: []}, null);
+  //da.collections.units.insert({id: 'v@units', location: [0, 1], data: []}, null);
+
   io.on('connection', (socket) => {
     socket.on('message', (d) => {
       console.log('Message Received: '); // debug
@@ -27,11 +30,16 @@ da.on('ready', () => {
 function processMessage(socket, d) {
   switch(d.type) {
     case 'query':
-      da.collections.units.queryIgnoreData(d.data.id, (err, doc) => {
+      da.collections.units.queryByLocation([0,1], (err, docs) => {
         console.log('Fetched: '); // debug
-        console.log(doc); // debug
-        socket.send(doc);
+        console.log(docs); // debug
+        socket.send(docs);
       });
+      // da.collections.units.queryIgnoreData(d.data.id, (err, doc) => {
+      //   console.log('Fetched: '); // debug
+      //   console.log(doc); // debug
+      //   socket.send(doc);
+      // });
       break;
     default:
       console.log(`Invalid data type "${d.type}"`);
