@@ -13,9 +13,14 @@ const MsgTypes = Object.freeze({
 });
 
 da.on('ready', () => {
-  //da.collections.units.insert({id: 'u@units', location: [12, 21], data: []}, null);
-  //da.collections.units.insert({id: 'v@units', location: [0, 1], data: []}, null);
-
+  // da.collections.units.insert({id: 'a@units', location: [40.6346711, -73.9612192], data: []}, null);
+  // da.collections.units.insert({id: 'b@units', location: [40.6346752, -73.9634077], data: []}, null);
+  // da.collections.units.insert({id: 'c@units', location: [40.634240, -73.961230], data: []}, null);
+  // da.collections.units.insert({id: 'd@units', location: [40.633882, -73.961188], data: []}, null);
+  // da.collections.units.insert({id: 'e@units', location: [40.633695, -73.961027], data: []}, null);
+  // da.collections.units.deleteAll();
+  console.log('ready');
+  
   io.on('connection', (socket) => {
     socket.on('message', (d) => {
       console.log('Message Received: '); // debug
@@ -30,16 +35,13 @@ da.on('ready', () => {
 function processMessage(socket, d) {
   switch(d.type) {
     case 'query':
-      da.collections.units.queryByLocation([0,1], (err, docs) => {
+      da.collections.units.queryAllIgnoreData((err, docs) => {
         console.log('Fetched: '); // debug
         console.log(docs); // debug
-        socket.send(docs);
+        //socket.send(docs);
+        //socket.emit('units', docs);
+        setTimeout(() => socket.emit('units', docs), 5000);
       });
-      // da.collections.units.queryIgnoreData(d.data.id, (err, doc) => {
-      //   console.log('Fetched: '); // debug
-      //   console.log(doc); // debug
-      //   socket.send(doc);
-      // });
       break;
     default:
       console.log(`Invalid data type "${d.type}"`);
