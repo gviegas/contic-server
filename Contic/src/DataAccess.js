@@ -43,47 +43,6 @@ const DATA_DOC = {
   value: 0
 };
 
-function userDoc(id, name, password, access, unit_id = '') {
-  let doc = USER_DOC;
-  doc.id = id;
-  doc.name = name;
-  doc.password = password;
-  doc.access = access;
-  doc.unit_id = unit_id;
-  return doc;
-}
-
-function unitDoc(id, location, data = []) {
-  let doc = UNIT_DOC;
-  doc.id = id;
-  doc.location = location,
-  doc.data = data;
-  return doc;
-}
-
-function vdataDoc(id, unit_id, data = []) {
-  let doc = VDATA_DOC;
-  doc.id = id;
-  doc.unit_id = unit_id;
-  doc.data = data;
-  return doc;
-}
-
-function zoneDoc(id, name, units_id) {
-  let doc = ZONE_DOC;
-  doc.id = id;
-  doc.name = name;
-  doc.units_id = units_id;
-  return doc;
-}
-
-function dataDoc(time, value) {
-  let doc = DATA_DOC;
-  doc.time = time;
-  doc.value = value;
-  return doc;
-}
-
 //todo
 class UsersColl {}
 
@@ -93,7 +52,10 @@ class UnitsColl {
   }
 
   query(id, callback) {
-    this.collection.findOne({id: id}, callback);
+    if(Array.isArray(id))
+      this.collection.find({id: {$in: id}}).toArray(callback);
+    else
+      this.collection.findOne({id: id}, callback);
   }
 
   queryByLocation(location, callback) {
@@ -105,7 +67,10 @@ class UnitsColl {
   }
 
   queryIgnoreData(id, callback) {
-    this.collection.findOne({id: id}, {data: 0}, callback);
+    if(Array.isArray(id))
+      this.collection.find({id: {$in: id}}).project({data: 0}).toArray(callback);
+    else
+      this.collection.findOne({id: id}, {data: 0}, callback);
   }
 
   queryByLocationIgnoreData(location, callback) {
@@ -173,47 +138,47 @@ class DataAccess extends EventEmitter {
     }
   }
 
-  queryUser(id, callback) {
-    if(Array.isArray(id)) {
+  // queryUser(id, callback) {
+  //   if(Array.isArray(id)) {
 
-    }
-  }
-  queryUnit(id, callback) {
-    if(Array.isArray(id)) {
+  //   }
+  // }
+  // queryUnit(id, callback) {
+  //   if(Array.isArray(id)) {
       
-    }
-  }
-  queryZone(id, callback) {
-    if(Array.isArray(id)) {
+  //   }
+  // }
+  // queryZone(id, callback) {
+  //   if(Array.isArray(id)) {
       
-    }
-  }
-  queryVdataByUnit(unit_id, callback) {
-    if(Array.isArray(id)) {
+  //   }
+  // }
+  // queryVdataByUnit(unit_id, callback) {
+  //   if(Array.isArray(id)) {
       
-    }
-  }
-  queryUnitByLocation(location, callback) {
-    if(Array.isArray(id)) {
+  //   }
+  // }
+  // queryUnitByLocation(location, callback) {
+  //   if(Array.isArray(id)) {
       
-    }
-  }
+  //   }
+  // }
 
-  insertUser(id, name, password, access, unit_id, callback) {
+  // insertUser(id, name, password, access, unit_id, callback) {
   
-  }
-  insertUnit(id, location, data, callback) {
+  // }
+  // insertUnit(id, location, data, callback) {
 
-  }
-  insertZone(id, name, units_id, callback) {
+  // }
+  // insertZone(id, name, units_id, callback) {
 
-  }
-  insertVdata(id, unit_id, data, callback) {
+  // }
+  // insertVdata(id, unit_id, data, callback) {
 
-  }
-  insertData(time, value, unit_id, callback) {
+  // }
+  // insertData(time, value, unit_id, callback) {
 
-  }
+  // }
 }
 
 exports.DataAccess = new DataAccess();
