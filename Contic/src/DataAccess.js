@@ -24,8 +24,8 @@ const UNIT_DOC = {
 };
 
 const VDATA_DOC = {
-  id: '',
-  unit_id: '',
+  id: '', // == unit id
+  location: '', // == unit location
   data: [{
     time: new Date(),
     value: 0
@@ -102,6 +102,29 @@ class VdataColl {
   constructor(db, name) {
     this.collection = db.collection(name);
   }
+
+  query(id, callback) {
+    if(Array.isArray(id))
+      this.collection.find({id: {$in: id}}).toArray(callback);
+    else
+      this.collection.findOne({id: id}, callback);
+  }
+
+  queryAll(callback) {
+    this.collection.find({}).toArray(callback); // use 'next' or 'each' instead
+  }
+
+  insert(doc, callback = null) {
+    this.collection.insert(doc, callback);
+  }
+
+  delete(id, callback = null) {
+    this.collection.deleteOne({id: id}, callback);
+  }
+
+  deleteAll(callback = null) {
+    this.collection.deleteMany({}, callback);
+  }
 }
 
 // todo
@@ -126,7 +149,7 @@ class DataAccess extends EventEmitter {
       //this.collections.users = new DbCollection(db, 'users');
       this.collections.units = new UnitsColl(db, 'units');
       //this.collections.zones = new DbCollection(db, 'zones');
-      //this.collections.vdata = new DbCollection(db, 'vdata');
+      this.collections.vdata = new VdataColl(db, 'vdata');
       this.emit('ready');
     });
   }
