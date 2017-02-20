@@ -6,79 +6,21 @@ const EventEmitter = require('events');
 const MongoClient = require('mongodb').MongoClient;
 const Db = require('./DB').Db;
 
-const USER_DOC = {
-  id: '',
-  name: '',
-  password: '',
-  access: 0,
-  unit_id: ''
-};
-
-const UNIT_DOC = {
-  id: '',
-  location: '',
-  data: [{
-    time: new Date(),
-    value: 0
-  }]
-};
-
-const VDATA_DOC = {
-  id: '', // == unit id
-  location: '', // == unit location
-  data: [{
-    time: new Date(),
-    value: 0
-  }]
-};
-
-const ZONE_DOC = {
-  id: '',
-  name: '',
-  units_id: ['']
-};
-
-const DATA_DOC = {
-  time: new Date(), 
-  value: 0
-};
-
-//todo
-class UsersColl {}
-
-class UnitsColl {
+class Coll {
   constructor(db, name) {
     this.collection = db.collection(name);
+    this.collection.ensureIndex({id: 1}, {unique: true});
   }
 
   query(id, callback) {
     if(Array.isArray(id))
-      this.collection.find({id: {$in: id}}).toArray(callback);
+      this.collection.find({id: {$in: id}}).project({_id: 0}).toArray(callback);
     else
-      this.collection.findOne({id: id}, callback);
-  }
-
-  queryByLocation(location, callback) {
-    this.collection.find({location: location}).toArray(callback);
+      this.collection.findOne({id: id}, {_id: 0}, callback);
   }
 
   queryAll(callback) {
-    this.collection.find({}).toArray(callback); // use 'next' or 'each' instead
-  }
-
-  queryIgnoreData(id, callback) {
-    if(Array.isArray(id))
-      this.collection.find({id: {$in: id}}).project({data: 0}).toArray(callback);
-    else
-      this.collection.findOne({id: id}, {data: 0}, callback);
-  }
-
-  queryByLocationIgnoreData(location, callback) {
-    this.collection.find({location: location}).project({data: 0}).toArray(callback);
-  }
-
-  queryAllIgnoreData(callback) {
-    this.collection.find({}).project({data: 0}).toArray(callback); // use 'next' or 'each' instead
+    this.collection.find({}).project({_id: 0}).toArray(callback); // use 'next' or 'each' instead
   }
 
   insert(doc, callback = null) {
@@ -96,45 +38,56 @@ class UnitsColl {
   deleteAll(callback = null) {
     this.collection.deleteMany({}, callback);
   }
+
 }
 
-class VdataColl {
+class UnitsColl extends Coll {
   constructor(db, name) {
-    this.collection = db.collection(name);
+    super(db, name);
+    this.collection.ensureIndex({location: '2dsphere'});
   }
 
-  query(id, callback) {
+  queryByLocation(location, callback) {
+    this.collection.find({location: location}).project({_id: 0}).toArray(callback);
+  }
+
+  queryIgnoreData(id, callback) {
     if(Array.isArray(id))
-      this.collection.find({id: {$in: id}}).toArray(callback);
+      this.collection.find({id: {$in: id}}).project({_id: 0, data: 0}).toArray(callback);
     else
-      this.collection.findOne({id: id}, callback);
+      this.collection.findOne({id: id}, {_id: 0, data: 0}, callback);
   }
 
-  queryAll(callback) {
-    this.collection.find({}).toArray(callback); // use 'next' or 'each' instead
+  queryByLocationIgnoreData(location, callback) {
+    this.collection.find({location: location}).project({_id: 0, data: 0}).toArray(callback);
   }
 
-  insert(doc, callback = null) {
-    this.collection.insert(doc, callback);
+  queryAllIgnoreData(callback) {
+    this.collection.find({}).project({_id: 0, data: 0}).toArray(callback); // use 'next' or 'each' instead
+  }
+}
+
+class VdataColl extends Coll {
+  constructor(db, name) {
+    super(db, name);
+    this.collection.ensureIndex({'data.time': -1});
   }
 
-  delete(id, callback = null) {
-    this.collection.deleteOne({id: id}, callback);
-  }
-
-  deleteAll(callback = null) {
-    this.collection.deleteMany({}, callback);
+  // Note: This query only works if the data array is sorted by time.
+  // If the data is being updated using the pushInner() method to add
+  // the most recent connsumption value, it should work correctly.
+  queryAllFilterLatestData(callback) {
+    this.collection.find({}).project({_id: 0, data: {$slice: -1}}).toArray(callback);
   }
 }
 
 // todo
-class ZonesColl {}
+class UsersColl extends Coll {}
+class ZonesColl extends Coll {}
 
 const URL = 'mongodb://localhost:27017/condata';
 
-// todo
-// - create indexes
-// - db functions (presets for common operations)
+// doing
 class DataAccess extends EventEmitter {
   constructor(url = URL) {
     super();
@@ -146,10 +99,10 @@ class DataAccess extends EventEmitter {
   init(url) {
     this.db = new Db(url);
     this.db.on('connection', (db) => {
-      //this.collections.users = new DbCollection(db, 'users');
       this.collections.units = new UnitsColl(db, 'units');
-      //this.collections.zones = new DbCollection(db, 'zones');
       this.collections.vdata = new VdataColl(db, 'vdata');
+      //this.collections.users = new UsersColl(db, 'users');
+      //this.collections.zones = new ZonesColl(db, 'zones');
       this.emit('ready');
     });
   }
@@ -161,47 +114,17 @@ class DataAccess extends EventEmitter {
     }
   }
 
-  // queryUser(id, callback) {
-  //   if(Array.isArray(id)) {
+  queryUnits(callback) {
+    this.collections.units.queryAllIgnoreData(callback);
+  }
 
-  //   }
-  // }
-  // queryUnit(id, callback) {
-  //   if(Array.isArray(id)) {
-      
-  //   }
-  // }
-  // queryZone(id, callback) {
-  //   if(Array.isArray(id)) {
-      
-  //   }
-  // }
-  // queryVdataByUnit(unit_id, callback) {
-  //   if(Array.isArray(id)) {
-      
-  //   }
-  // }
-  // queryUnitByLocation(location, callback) {
-  //   if(Array.isArray(id)) {
-      
-  //   }
-  // }
+  queryConsumption(unit_ids, callback) {
+    this.collections.units.query(unit_ids, callback);
+  }
 
-  // insertUser(id, name, password, access, unit_id, callback) {
-  
-  // }
-  // insertUnit(id, location, data, callback) {
-
-  // }
-  // insertZone(id, name, units_id, callback) {
-
-  // }
-  // insertVdata(id, unit_id, data, callback) {
-
-  // }
-  // insertData(time, value, unit_id, callback) {
-
-  // }
+  queryLatestData(callback) {
+    this.collections.vdata.queryAllFilterLatestData(callback);
+  }
 }
 
 exports.DataAccess = new DataAccess();
