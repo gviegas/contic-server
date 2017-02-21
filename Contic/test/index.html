@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<head>
+  <!--
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  -->
+  <script src="http://localhost/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io('http://localhost/');
+    socket.on('connect', () => {
+      socket.send({
+        type: 'query',
+        data: {id: 't@units'}
+      });
+
+      socket.on('message', (d) => {
+        document.getElementsByTagName('body')[0].innerHTML = 'Check the Console!';
+        console.log('Message Received:');
+        console.log(d);
+      });
+    });
+  </script>
+</head>
+<body></body>
