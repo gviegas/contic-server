@@ -5,9 +5,16 @@
 const io = require('socket.io')(80);
 const da = require('./DataAccess').DataAccess;
 
+const tests = require('../test/TEST_Server');
+
 da.on('ready', () => {
   console.log('Ready');
-  
+
+  // test
+  // tests.TEST_UNITS(da);
+  // tests.TEST_VDATA(da);
+  //
+
   io.on('connection', (socket) => {
     socket.on('message', (d) => {
       console.log('Message Received.');
