@@ -5,14 +5,15 @@
 const io = require('socket.io')(80);
 const da = require('./DataAccess').DataAccess;
 
-const tests = require('../test/TEST_Server');
+const tests = require('../test/test');
 
 da.on('ready', () => {
   console.log('Ready');
 
   // test
-  // tests.TEST_UNITS(da);
-  // tests.TEST_VDATA(da);
+  da.collections.units.deleteAll();
+  da.collections.vdata.deleteAll();
+  tests.testData(da);
   //
 
   io.on('connection', (socket) => {
@@ -65,7 +66,7 @@ function processQuery(socket, d) {
           socket.emit('latest', docs);
         });
         break;
-      
+
     default:
       console.log(`Invalid query data: ${d.data}`);
   }
