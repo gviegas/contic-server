@@ -6,7 +6,7 @@ const EventEmitter = require('events');
 const assert = require('assert');
 const MongoClient = require('mongodb').MongoClient;
 
-class Db extends EventEmitter {
+class DataBase extends EventEmitter {
   constructor(url) {
     super();
     this.db = null;
@@ -34,4 +34,4 @@ class Db extends EventEmitter {
   log() { console.log(this.db); }
 }
 
-exports.Db = Db;
+exports.DataBase = DataBase;

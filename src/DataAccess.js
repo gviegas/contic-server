@@ -4,7 +4,7 @@
 
 const EventEmitter = require('events');
 const MongoClient = require('mongodb').MongoClient;
-const Db = require('./DB').Db;
+const DataBase = require('./DataBase').DataBase;
 const UnitsColl = require('./Collections').UnitsColl
 const VdataColl = require('./Collections').VdataColl
 
@@ -19,7 +19,7 @@ class DataAccess extends EventEmitter {
   }
 
   init(url) {
-    this.db = new Db(url);
+    this.db = new DataBase(url);
     this.db.on('connection', (db) => {
       this.collections.units = new UnitsColl(db, 'units');
       this.collections.vdata = new VdataColl(db, 'vdata');
