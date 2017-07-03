@@ -23,7 +23,7 @@ class Supply extends EventEmitter {
       // test
       da.collections.units.deleteAll();
       da.collections.vdata.deleteAll();
-      tests.testData(da);
+      // tests.testData(da);
       //
 
       this.startServer();
@@ -75,4 +75,4 @@ class Supply extends EventEmitter {
   }
 }
 
-new Supply({'port': 4080});
+exports.Supply = Supply;

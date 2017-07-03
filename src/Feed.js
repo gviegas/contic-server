@@ -17,16 +17,22 @@ class Feed extends EventEmitter {
   init() {
     da.on('ready', () => {
       console.log('Ready on Feed');
+
+      // test
+      setInterval(() => {
+        da.collections.vdata.queryAll((err, docs) => { console.log(docs); })
+      }, 10000);
+      //
+
       this.startServer();
     });
   }
 
   startServer() {
     this.server = net.createServer((c) => {
-      console.log('New connection from', c.address());
+      console.log('New connection on', c.address());
 
       c.on('data', (data) => {
-        // console.log('JSON:', JSON.parse(data.toString()));
         let obj = JSON.parse(data.toString());
         if(obj.request === 'create')
           da.insertUnit(obj.id, obj.coords)
@@ -47,4 +53,4 @@ class Feed extends EventEmitter {
   }
 }
 
-new Feed({'host': 'localhost', 'port': 45313});
+exports.Feed = Feed;

@@ -5,8 +5,8 @@
 const EventEmitter = require('events');
 const MongoClient = require('mongodb').MongoClient;
 const DataBase = require('./DataBase').DataBase;
-const UnitsColl = require('./Collections').UnitsColl
-const VdataColl = require('./Collections').VdataColl
+const UnitsColl = require('./Collections').UnitsColl;
+const VdataColl = require('./Collections').VdataColl;
 
 const URL = 'mongodb://localhost:27017/condata';
 
@@ -50,7 +50,8 @@ class DataAccess extends EventEmitter {
   }
 
   insertData(unit_id, data) {
-    this.collections.vdata.pushInner(unit_id, {data}); // TODO: data...
+    this.collections.units.pushInner(unit_id, {data: data});
+    this.collections.vdata.pushInner(unit_id, {data: data});
   }
 
   queryUnits(callback) {
