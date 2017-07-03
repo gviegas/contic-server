@@ -24,9 +24,18 @@ class Feed extends EventEmitter {
   startServer() {
     this.server = net.createServer((c) => {
       console.log('New connection from', c.address());
+
       c.on('data', (data) => {
-        console.log('Got data:', data);
+        // console.log('JSON:', JSON.parse(data.toString()));
+        let obj = JSON.parse(data.toString());
+        if(obj.request === 'create')
+          da.insertUnit(obj.id, obj.coords)
+        else if(obj.request === 'update')
+          da.insertData(obj.id, obj.data);
+        else
+          console.log('Invalid request', obj.request);
       });
+
       c.on('end', () => {
         console.log('Client disconnected');
       });

@@ -36,6 +36,23 @@ class DataAccess extends EventEmitter {
     }
   }
 
+  insertUnit(unit_id, coords) {
+    this.collections.units.insert({
+      id: unit_id,
+      location: {type: 'Point', coordinates: [coords.lng, coords.lat]},
+      data: []
+    });
+    this.collections.vdata.insert({
+      id: unit_id,
+      location: {type: 'Point', coordinates: [coords.lng, coords.lat]},
+      data: []
+    });
+  }
+
+  insertData(unit_id, data) {
+    this.collections.vdata.pushInner(unit_id, {data}); // TODO: data...
+  }
+
   queryUnits(callback) {
     this.collections.units.queryAllIgnoreData(callback);
   }
