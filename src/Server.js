@@ -5,5 +5,5 @@
 const Feed = require('./Feed').Feed;
 const Supply = require('./Supply').Supply;
 
-new Supply({'port': 4080});
+new Supply({'port': 80});
 new Feed({'host': 'localhost', 'port': 45313});

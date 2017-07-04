@@ -33,13 +33,18 @@ class Feed extends EventEmitter {
       console.log('New connection on', c.address());
 
       c.on('data', (data) => {
-        let obj = JSON.parse(data.toString());
-        if(obj.request === 'create')
-          da.insertUnit(obj.id, obj.coords)
-        else if(obj.request === 'update')
-          da.insertData(obj.id, obj.data);
-        else
-          console.log('Invalid request', obj.request);
+        let msgs = data.toString().split('\n');
+        for(let m of msgs) {
+          // console.log('m', m);
+          if(m === '') continue;
+          let obj = JSON.parse(m);
+          if(obj.request === 'create')
+            da.insertUnit(obj.id, obj.coords)
+          else if(obj.request === 'update')
+            da.insertData(obj.id, obj.data);
+          else
+            console.log('Invalid request', obj.request);
+        }
       });
 
       c.on('end', () => {
