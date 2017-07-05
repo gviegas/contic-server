@@ -35,7 +35,6 @@ class Feed extends EventEmitter {
       c.on('data', (data) => {
         let msgs = data.toString().split('\n');
         for(let m of msgs) {
-          // console.log('m', m);
           if(m === '') continue;
           let obj = JSON.parse(m);
           if(obj.request === 'create')

@@ -3,6 +3,7 @@
 //
 
 const EventEmitter = require('events');
+const http = require('http');
 const io = require('socket.io');
 const da = require('./DataAccess').DataAccess;
 
@@ -21,8 +22,8 @@ class Supply extends EventEmitter {
       console.log('Ready on Supply');
 
       // test
-      da.collections.units.deleteAll();
-      da.collections.vdata.deleteAll();
+      // da.collections.units.deleteAll();
+      // da.collections.vdata.deleteAll();
       // tests.testData(da);
       //
 
@@ -31,13 +32,17 @@ class Supply extends EventEmitter {
   }
 
   startServer() {
-    this.server = io(this.addr.port).on('connection', (s) => {
+    this.server = http.createServer();
+
+    io(this.server).on('connection', (s) => {
       s.on('message', (d) => {
         console.log('Message Received.');
         this.processMessage(s, d);
       });
       s.on('disconnect', () => console.log('disconnected'));
     });
+
+    this.server.listen(this.addr.port);
   }
 
   processMessage(s, d) {
