@@ -17,13 +17,6 @@ class Feed extends EventEmitter {
   init() {
     da.on('ready', () => {
       console.log('Ready on Feed');
-
-      // test
-      setInterval(() => {
-        da.collections.vdata.queryAll((err, docs) => { console.log(docs); })
-      }, 10000);
-      //
-
       this.startServer();
     });
   }

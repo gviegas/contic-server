@@ -18,7 +18,8 @@ class Coll {
   }
 
   queryAll(callback) {
-    this.collection.find({}).project({_id: 0}).toArray(callback); // use 'next' or 'each' instead
+    // TODO: use 'next' or 'each' instead
+    this.collection.find({}).project({_id: 0}).toArray(callback);
   }
 
   insert(doc, callback = null) {
@@ -46,22 +47,26 @@ class UnitsColl extends Coll {
   }
 
   queryByLocation(location, callback) {
-    this.collection.find({location: location}).project({_id: 0}).toArray(callback);
+    this.collection.find({location: location}).project({_id: 0})
+      .toArray(callback);
   }
 
   queryIgnoreData(id, callback) {
     if(Array.isArray(id))
-      this.collection.find({id: {$in: id}}).project({_id: 0, data: 0}).toArray(callback);
+      this.collection.find({id: {$in: id}}).project({_id: 0, data: 0})
+        .toArray(callback);
     else
       this.collection.findOne({id: id}, {_id: 0, data: 0}, callback);
   }
 
   queryByLocationIgnoreData(location, callback) {
-    this.collection.find({location: location}).project({_id: 0, data: 0}).toArray(callback);
+    this.collection.find({location: location}).project({_id: 0, data: 0})
+      .toArray(callback);
   }
 
   queryAllIgnoreData(callback) {
-    this.collection.find({}).project({_id: 0, data: 0}).toArray(callback); // use 'next' or 'each' instead
+    // TODO: use 'next' or 'each' instead
+    this.collection.find({}).project({_id: 0, data: 0}).toArray(callback);
   }
 }
 
@@ -71,16 +76,17 @@ class VdataColl extends Coll {
     this.collection.ensureIndex({'data.time': -1});
   }
 
-  // Note: This query only works if the data array is sorted by time.
+  // NOTE: This query only works if the data array is sorted by time.
   // If the data is being updated using the pushInner() method to add
   // the most recent connsumption value, it should work correctly.
   queryAllFilterLatestData(callback) {
-    this.collection.find({}).project({_id: 0, data: {$slice: -1}}).toArray(callback);
+    this.collection.find({}).project({_id: 0, data: {$slice: -1}})
+      .toArray(callback);
   }
 }
 
-class UsersColl extends Coll {} // todo
-class ZonesColl extends Coll {} // todo
+class UsersColl extends Coll {} // TODO
+class ZonesColl extends Coll {} // TODO
 
 exports.UnitsColl = UnitsColl;
 exports.VdataColl = VdataColl;

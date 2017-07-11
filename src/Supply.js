@@ -7,8 +7,6 @@ const http = require('http');
 const io = require('socket.io');
 const da = require('./DataAccess').DataAccess;
 
-const tests = require('../test/test');
-
 class Supply extends EventEmitter {
   constructor(addr) {
     super();
@@ -20,13 +18,6 @@ class Supply extends EventEmitter {
   init() {
     da.on('ready', () => {
       console.log('Ready on Supply');
-
-      // test
-      // da.collections.units.deleteAll();
-      // da.collections.vdata.deleteAll();
-      // tests.testData(da);
-      //
-
       this.startServer();
     });
   }
@@ -35,10 +26,7 @@ class Supply extends EventEmitter {
     this.server = http.createServer();
 
     io(this.server).on('connection', (s) => {
-      s.on('message', (d) => {
-        console.log('Message Received.');
-        this.processMessage(s, d);
-      });
+      s.on('message', (d) => this.processMessage(s, d));
       s.on('disconnect', () => console.log('disconnected'));
     });
 
@@ -58,21 +46,16 @@ class Supply extends EventEmitter {
   processQuery(s, d) {
     switch(d.data) {
       case 'units':
-        da.queryUnits((err, docs) => {
-          s.emit('units', docs);
-        });
+        da.queryUnits((err, docs) => s.emit('units', docs));
         break;
       case 'consumption':
         if(d.target) {
-          da.queryConsumption(d.target, (err, docs) => {
-            s.emit('consumption', docs);
-          });
+          da.queryConsumption(d.target, (err, docs) =>
+            s.emit('consumption', docs));
         }
         break;
       case 'latest':
-        da.queryLatestData((err, docs) => {
-          s.emit('latest', docs);
-        });
+        da.queryLatestData((err, docs) => s.emit('latest', docs));
         break;
       default:
         console.log('Invalid query data:', d.data);

@@ -23,8 +23,8 @@ class DataAccess extends EventEmitter {
     this.db.on('connection', (db) => {
       this.collections.units = new UnitsColl(db, 'units');
       this.collections.vdata = new VdataColl(db, 'vdata');
-      //this.collections.users = new UsersColl(db, 'users');
-      //this.collections.zones = new ZonesColl(db, 'zones');
+      // this.collections.users = new UsersColl(db, 'users');
+      // this.collections.zones = new ZonesColl(db, 'zones');
       this.emit('ready');
     });
   }
